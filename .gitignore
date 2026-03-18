@@ -1,9 +1,14 @@
 *
 !.gitignore
-!scripts
+!scripts/
+!scripts/**
+scripts/__pycache__/
+*.py[oc]
 !pyproject.toml
 !README.md
 !uv.lock
+
+
 
 
 # output
