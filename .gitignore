@@ -1,17 +1,27 @@
-output
-data
-meta
-videos
-video_data
-info-out.txt
+*
+!.gitignore
+!scripts
+!pyproject.toml
+!README.md
+!uv.lock
 
-# Python-generated files
-__pycache__/
-*.py[oc]
-build/
-dist/
-wheels/
-*.egg-info
 
-# Virtual environments
-.venv
+# output
+# data
+# meta
+# videos
+# video_data
+# info-out.txt
+# hf_videos
+
+# # Python-generated files
+# __pycache__/
+# *.py[oc]
+# build/
+# dist/
+# wheels/
+# *.egg-info
+
+# # Virtual environments
+# .venv
+
