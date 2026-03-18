@@ -88,6 +88,16 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Optional encoder thread count hint passed to the LeRobot video encoder.",
     )
+    parser.add_argument(
+        "--push-only",
+        action="store_true",
+        help="Skip rewriting and only push an existing local destination dataset to the Hub.",
+    )
+    parser.add_argument(
+        "--upload-large-folder",
+        action="store_true",
+        help="Use the Hugging Face large-folder upload path, which is more resilient for big datasets.",
+    )
     return parser.parse_args()
 
 
@@ -139,12 +149,35 @@ def build_frame(item: dict, feature_names: list[str]) -> dict:
 
 def main() -> None:
     args = parse_args()
-    trim_starts = load_trim_starts(args.trim_csv, args.episode_column, args.trim_column)
-
-    src = LeRobotDataset(repo_id=args.repo_id, root=args.root)
 
     if args.overwrite and args.resume:
         raise ValueError("Use only one of --overwrite or --resume")
+
+    if args.push_only and not args.push_to_hub:
+        raise ValueError("--push-only requires --push-to-hub")
+
+    if args.push_only:
+        if args.new_root is None or not args.new_root.exists():
+            raise FileNotFoundError(
+                "--push-only requires an existing --new-root destination dataset on disk"
+            )
+        dst = LeRobotDataset(repo_id=args.new_repo_id, root=args.new_root)
+        print(
+            f"pushing existing local dataset {args.new_repo_id}"
+            + (f" to branch {args.branch}" if args.branch else ""),
+            flush=True,
+        )
+        dst.push_to_hub(
+            branch=args.branch,
+            private=args.private,
+            upload_large_folder=args.upload_large_folder,
+        )
+        print(f"done: pushed {dst.root}", flush=True)
+        return
+
+    trim_starts = load_trim_starts(args.trim_csv, args.episode_column, args.trim_column)
+
+    src = LeRobotDataset(repo_id=args.repo_id, root=args.root)
 
     if args.new_root is not None and args.new_root.exists():
         if not args.overwrite:
@@ -244,7 +277,11 @@ def main() -> None:
             + (f" to branch {args.branch}" if args.branch else ""),
             flush=True,
         )
-        dst.push_to_hub(branch=args.branch, private=args.private)
+        dst.push_to_hub(
+            branch=args.branch,
+            private=args.private,
+            upload_large_folder=args.upload_large_folder,
+        )
 
     print(f"done: wrote {dst.num_episodes} episodes to {dst.root}", flush=True)
 
