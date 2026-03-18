@@ -1,3 +1,10 @@
+output
+data
+meta
+videos
+video_data
+info-out.txt
+
 # Python-generated files
 __pycache__/
 *.py[oc]
