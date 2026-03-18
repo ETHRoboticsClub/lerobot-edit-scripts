@@ -13,6 +13,7 @@ fps = ds.fps
 frames_before = round(seconds_before * fps)
 joint_names = ["left_joint_2.pos", "right_joint_2.pos"]
 joint_idxs = [ds.features["observation.state"]["names"].index(name) for name in joint_names]
+ds._ensure_hf_dataset_loaded()
 
 
 def load_processed_episodes(path: Path) -> set[int]:
@@ -72,11 +73,9 @@ with output_path.open("a", newline="") as f:
 
         ep_start = ds.meta.episodes["dataset_from_index"][ep]
         ep_end = ds.meta.episodes["dataset_to_index"][ep]
+        states = np.asarray(ds.hf_dataset[ep_start:ep_end]["observation.state"])
 
-        hit = np.flatnonzero([
-            any(ds[i]["observation.state"][joint_idx].item() > threshold for joint_idx in joint_idxs)
-            for i in range(ep_start, ep_end)
-        ])
+        hit = np.flatnonzero(np.any(states[:, joint_idxs] > threshold, axis=1))
 
         new_start = ep_start if len(hit) == 0 else max(ep_start, ep_start + int(hit[0]) - frames_before)
         local_start = 0
