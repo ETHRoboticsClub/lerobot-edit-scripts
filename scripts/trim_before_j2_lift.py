@@ -2,12 +2,14 @@ import numpy as np
 from lerobot.datasets.lerobot_dataset import LeRobotDataset
 
 repo_id = "ETHRC/towelspring26-cleaned"
-seconds_before = 0.5
-threshold = 0.3
+seconds_before = 0.3
+threshold = 0.1
 
 ds = LeRobotDataset(repo_id)
 fps = ds.fps
 frames_before = round(seconds_before * fps)
+joint_names = ["left_joint_2.pos", "right_joint_2.pos"]
+joint_idxs = [ds.features["observation.state"]["names"].index(name) for name in joint_names]
 
 
 def format_ts(frame_idx: int) -> str:
@@ -20,13 +22,14 @@ def format_ts(frame_idx: int) -> str:
     return f"{whole}.{millis:03d}s"
 
 print(f"num_episodes={ds.num_episodes}", flush=True)
+print(f"joints={', '.join(joint_names)}", flush=True)
 
 for ep in range(ds.num_episodes):
     ep_start = ds.meta.episodes["dataset_from_index"][ep]
     ep_end = ds.meta.episodes["dataset_to_index"][ep]
 
     hit = np.flatnonzero([
-        ds[i]["observation.state"][1].item() > threshold
+        any(ds[i]["observation.state"][joint_idx].item() > threshold for joint_idx in joint_idxs)
         for i in range(ep_start, ep_end)
     ])
 
