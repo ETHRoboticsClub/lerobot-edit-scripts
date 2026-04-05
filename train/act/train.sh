@@ -1,18 +1,53 @@
+# if [ -z "${WANDB_API_KEY:-}" ]; then
+#   printf 'Missing required environment variable: WANDB_API_KEY\n'
+#   printf 'Run `wandb login` or export WANDB_API_KEY before starting training.\n'
+#   exit 1
+# fi
+
 export WANDB_MODE=online
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-DEVICE_CONFIG="${DEVICE_CONFIG:-$SCRIPT_DIR/configs/aws_gpul.yaml}"
+CONFIG_DIR="$SCRIPT_DIR/configs"
+JOB_CONFIG="${JOB_CONFIG:-$SCRIPT_DIR/configs/job.yaml}"
+
+detect_device_config() {
+  local gpu_name gpu_name_lower fallback_config
+  fallback_config="$CONFIG_DIR/aws_gpul.yaml"
+  gpu_name="$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -n 1 | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+  gpu_name_lower="$(printf '%s' "$gpu_name" | tr '[:upper:]' '[:lower:]')"
+
+  case "$gpu_name_lower" in
+    *gb10*)
+      printf '%s\n' "$CONFIG_DIR/spark.yaml"
+      ;;
+    *5080*)
+      printf '%s\n' "$CONFIG_DIR/5080_workstation.yaml"
+      ;;
+    *)
+      printf '%s\n' "$fallback_config"
+      ;;
+  esac
+}
+
+DEVICE_CONFIG="${DEVICE_CONFIG:-$(detect_device_config)}"
+
+OUTPUT_DIR_OVERRIDE="${OUTPUT_DIR:-}"
+CONFIG_PATH_OVERRIDE="${CONFIG_PATH:-}"
+RESUME_OVERRIDE="${RESUME:-}"
 
 eval "$(
-  UV_CACHE_DIR=/tmp/uv-cache uv run python - "$DEVICE_CONFIG" <<'PY'
+  UV_CACHE_DIR=/tmp/uv-cache uv run python - "$DEVICE_CONFIG" "$JOB_CONFIG" <<'PY'
 import shlex
 import sys
 
 import yaml
 
-with open(sys.argv[1]) as f:
-    config = yaml.safe_load(f)
+config = {}
+for path in sys.argv[1:]:
+    with open(path) as f:
+        loaded = yaml.safe_load(f) or {}
+    config.update(loaded)
 
 for key, value in config.items():
     shell_key = key.upper()
@@ -28,11 +63,21 @@ DATASET_REPO_ID="${DATASET_REPO_ID:-$(UV_CACHE_DIR=/tmp/uv-cache uv run python "
 
 DATASET_REPO_ID="${DATASET_REPO_ID_OVERRIDE:-$DATASET_REPO_ID}"
 POLICY_REPO_ID="${POLICY_REPO_ID_OVERRIDE:-$POLICY_REPO_ID}"
-OUTPUT_DIR="${OUTPUT_DIR:-$OUTPUT_DIR}"
 JOB_NAME="${JOB_NAME_OVERRIDE:-$JOB_NAME}"
-RESUME="${RESUME:-true}"
+ARCHITECTURE="${ARCHITECTURE_OVERRIDE:-$ARCHITECTURE}"
+RUN_NAME="${RUN_NAME_OVERRIDE:-$RUN_NAME}"
+CHECKPOINT_DIR="${CHECKPOINT_DIR_OVERRIDE:-$CHECKPOINT_DIR}"
+OUTPUT_DIR_DEFAULT="$CHECKPOINT_DIR/$ARCHITECTURE/$RUN_NAME"
+OUTPUT_DIR="${OUTPUT_DIR_OVERRIDE:-$OUTPUT_DIR_DEFAULT}"
+RESUME="${RESUME_OVERRIDE:-${RESUME:-true}}"
 CHECKPOINT_NAME="${CHECKPOINT_NAME:-last}"
-CONFIG_PATH="${CONFIG_PATH:-$OUTPUT_DIR/checkpoints/$CHECKPOINT_NAME/pretrained_model/train_config.json}"
+if [ -n "$CONFIG_PATH_OVERRIDE" ]; then
+  CONFIG_PATH="$CONFIG_PATH_OVERRIDE"
+elif [ "$RESUME" = "true" ]; then
+  CONFIG_PATH="$OUTPUT_DIR/checkpoints/$CHECKPOINT_NAME/pretrained_model/train_config.json"
+else
+  CONFIG_PATH=""
+fi
 
 NUM_MACHINES="${NUM_MACHINES_OVERRIDE:-$NUM_MACHINES}"
 MULTI_GPU="${MULTI_GPU_OVERRIDE:-$MULTI_GPU}"
@@ -51,6 +96,9 @@ required_vars=(
   POLICY_REPO_ID
   OUTPUT_DIR
   JOB_NAME
+  ARCHITECTURE
+  RUN_NAME
+  CHECKPOINT_DIR
   NUM_MACHINES
   MULTI_GPU
   NUM_PROCESSES
@@ -67,10 +115,17 @@ required_vars=(
 for var_name in "${required_vars[@]}"; do
   if [ -z "${!var_name}" ]; then
     printf 'Missing config value: %s\n' "$var_name"
-    printf 'Config file: %s\n' "$DEVICE_CONFIG"
+    printf 'Device config file: %s\n' "$DEVICE_CONFIG"
+    printf 'Job config file: %s\n' "$JOB_CONFIG"
     exit 1
   fi
 done
+
+if [ "$RESUME" = "true" ] && [ ! -f "$CONFIG_PATH" ]; then
+  printf 'Resume config file not found: %s\n' "$CONFIG_PATH"
+  printf 'Set CONFIG_PATH explicitly or choose an OUTPUT_DIR/CHECKPOINT_NAME with a valid checkpoint.\n'
+  exit 1
+fi
 
 if [ -d "$OUTPUT_DIR" ] && [ "$RESUME" != "true" ]; then
   printf 'Output directory already exists: %s\n' "$OUTPUT_DIR"

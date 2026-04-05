@@ -1,6 +1,4 @@
-policy_repo_id: ETHRC/act-towelspring26_2
-output_dir: /home/ethrc/Desktop/training/checkpoints/act/run2
-job_name: act_training_1
+checkpoint_dir: /home/ethrc/Desktop/training/checkpoints
 num_machines: 1
 multi_gpu: false
 num_processes: 1

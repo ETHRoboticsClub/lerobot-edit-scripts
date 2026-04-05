@@ -1,0 +1,1 @@
+uv run lerobot-edit-dataset --new_repo_id ETHRC/towelspring_realsense --operation.type merge --operation.repo_ids "['ETHRC/towelspring26_2', 'ETHRC/towelspring26_3']" --push_to_hub true

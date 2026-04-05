@@ -1,0 +1,12 @@
+checkpoint_dir: /home/baraq/Desktop/training/checkpoints
+num_machines: 1
+multi_gpu: false
+num_processes: 1
+mixed_precision: bf16
+dynamo_backend: "no"
+batch_size: 50
+steps: 25000
+optimizer_lr: 6e-5
+num_workers: 16
+video_backend: pyav
+policy_device: cuda

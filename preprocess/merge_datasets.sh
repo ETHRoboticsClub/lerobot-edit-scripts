@@ -43,33 +43,28 @@ PUSH_TO_HUB="${PUSH_TO_HUB:-true}"
 NEW_ROOT="${NEW_ROOT:-}"
 UV_CACHE_DIR="${UV_CACHE_DIR:-.uv-cache}"
 
-REPO_IDS="[\"${SOURCE_REPO_ID_1}\",\"${SOURCE_REPO_ID_2}\"]"
-
 cmd=(
   uv
   run
-  lerobot-edit-dataset
-  --operation.type
-  merge
-  --operation.repo_ids
-  "${REPO_IDS}"
-  --new_repo_id
+  python
+  preprocess/merge_datasets.py
+  "${SOURCE_REPO_ID_1}"
+  "${SOURCE_REPO_ID_2}"
   "${NEW_REPO_ID}"
-  --push_to_hub
+  --push-to-hub
   "${PUSH_TO_HUB}"
 )
 
 if [[ -n "${SOURCE_ROOT_1}" ]]; then
-  ROOTS="[\"${SOURCE_ROOT_1}\",\"${SOURCE_ROOT_2}\"]"
   cmd+=(
-    --operation.roots
-    "${ROOTS}"
+    "${SOURCE_ROOT_1}"
+    "${SOURCE_ROOT_2}"
   )
 fi
 
 if [[ -n "${NEW_ROOT}" ]]; then
   cmd+=(
-    --new_root
+    --new-root
     "${NEW_ROOT}"
   )
 fi
