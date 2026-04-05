@@ -3,25 +3,45 @@ export WANDB_MODE=online
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEVICE_CONFIG="${DEVICE_CONFIG:-$SCRIPT_DIR/configs/aws_gpul.yaml}"
 
-DATASET_REPO_ID="$(yq -r '.dataset_repo_id' "$DEVICE_CONFIG")"
-POLICY_REPO_ID="$(yq -r '.policy_repo_id' "$DEVICE_CONFIG")"
-OUTPUT_DIR="${OUTPUT_DIR:-$(yq -r '.output_dir' "$DEVICE_CONFIG")}"
-JOB_NAME="$(yq -r '.job_name' "$DEVICE_CONFIG")"
+eval "$(
+  UV_CACHE_DIR=/tmp/uv-cache uv run python - <<'PY' "$DEVICE_CONFIG"
+import shlex
+import sys
+
+import yaml
+
+with open(sys.argv[1]) as f:
+    config = yaml.safe_load(f)
+
+for key, value in config.items():
+    shell_key = key.upper()
+    if isinstance(value, bool):
+        shell_value = "true" if value else "false"
+    else:
+        shell_value = str(value)
+    print(f'{shell_key}={shlex.quote(shell_value)}')
+PY
+)"
+
+DATASET_REPO_ID="${DATASET_REPO_ID_OVERRIDE:-$DATASET_REPO_ID}"
+POLICY_REPO_ID="${POLICY_REPO_ID_OVERRIDE:-$POLICY_REPO_ID}"
+OUTPUT_DIR="${OUTPUT_DIR:-$OUTPUT_DIR}"
+JOB_NAME="${JOB_NAME_OVERRIDE:-$JOB_NAME}"
 RESUME="${RESUME:-true}"
 CHECKPOINT_NAME="${CHECKPOINT_NAME:-last}"
 CONFIG_PATH="${CONFIG_PATH:-$OUTPUT_DIR/checkpoints/$CHECKPOINT_NAME/pretrained_model/train_config.json}"
 
-NUM_MACHINES="$(yq -r '.num_machines' "$DEVICE_CONFIG")"
-MULTI_GPU="$(yq -r '.multi_gpu' "$DEVICE_CONFIG")"
-NUM_PROCESSES="$(yq -r '.num_processes' "$DEVICE_CONFIG")"
-MIXED_PRECISION="$(yq -r '.mixed_precision' "$DEVICE_CONFIG")"
-DYNAMO_BACKEND="$(yq -r '.dynamo_backend' "$DEVICE_CONFIG")"
-BATCH_SIZE="$(yq -r '.batch_size' "$DEVICE_CONFIG")"
-STEPS="$(yq -r '.steps' "$DEVICE_CONFIG")"
-OPTIMIZER_LR="$(yq -r '.optimizer_lr' "$DEVICE_CONFIG")"
-NUM_WORKERS="$(yq -r '.num_workers' "$DEVICE_CONFIG")"
-VIDEO_BACKEND="$(yq -r '.video_backend' "$DEVICE_CONFIG")"
-POLICY_DEVICE="$(yq -r '.policy_device' "$DEVICE_CONFIG")"
+NUM_MACHINES="${NUM_MACHINES_OVERRIDE:-$NUM_MACHINES}"
+MULTI_GPU="${MULTI_GPU_OVERRIDE:-$MULTI_GPU}"
+NUM_PROCESSES="${NUM_PROCESSES_OVERRIDE:-$NUM_PROCESSES}"
+MIXED_PRECISION="${MIXED_PRECISION_OVERRIDE:-$MIXED_PRECISION}"
+DYNAMO_BACKEND="${DYNAMO_BACKEND_OVERRIDE:-$DYNAMO_BACKEND}"
+BATCH_SIZE="${BATCH_SIZE_OVERRIDE:-$BATCH_SIZE}"
+STEPS="${STEPS_OVERRIDE:-$STEPS}"
+OPTIMIZER_LR="${OPTIMIZER_LR_OVERRIDE:-$OPTIMIZER_LR}"
+NUM_WORKERS="${NUM_WORKERS_OVERRIDE:-$NUM_WORKERS}"
+VIDEO_BACKEND="${VIDEO_BACKEND_OVERRIDE:-$VIDEO_BACKEND}"
+POLICY_DEVICE="${POLICY_DEVICE_OVERRIDE:-$POLICY_DEVICE}"
 
 if [ -d "$OUTPUT_DIR" ] && [ "$RESUME" != "true" ]; then
   printf 'Output directory already exists: %s\n' "$OUTPUT_DIR"
