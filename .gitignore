@@ -1,6 +1,9 @@
 .venv
 .uv-cache
 *__pycache__
+data
+meta
+videos
 
 # *
 # !.gitignore

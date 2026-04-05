@@ -12,7 +12,7 @@ configs:
 This dataset was created using [LeRobot](https://github.com/huggingface/lerobot).
 
 
-<a class="flex" href="https://huggingface.co/spaces/lerobot/visualize_dataset?path=ETHRC/towelspring26_3">
+<a class="flex" href="https://huggingface.co/spaces/lerobot/visualize_dataset?path=ETHRC/towelspring26_realsense">
 <img class="block dark:hidden" src="https://huggingface.co/datasets/huggingface/badges/resolve/main/visualize-this-dataset-xl.svg"/>
 <img class="hidden dark:block" src="https://huggingface.co/datasets/huggingface/badges/resolve/main/visualize-this-dataset-xl-dark.svg"/>
 </a>
@@ -33,15 +33,15 @@ This dataset was created using [LeRobot](https://github.com/huggingface/lerobot)
 {
     "codebase_version": "v3.0",
     "robot_type": "bi_yams_follower",
-    "total_episodes": 44,
-    "total_frames": 24137,
+    "total_episodes": 91,
+    "total_frames": 51677,
     "total_tasks": 1,
     "chunks_size": 1000,
     "data_files_size_in_mb": 100,
     "video_files_size_in_mb": 200,
     "fps": 30,
     "splits": {
-        "train": "0:44"
+        "train": "0:91"
     },
     "data_path": "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
     "video_path": "videos/{video_key}/chunk-{chunk_index:03d}/file-{file_index:03d}.mp4",
