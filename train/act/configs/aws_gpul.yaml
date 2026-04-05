@@ -5,8 +5,8 @@ num_processes: 1
 mixed_precision: bf16
 dynamo_backend: "no"
 batch_size: 48
-steps: 5000
-optimizer_lr: 5e-5
-num_workers: 8
+steps: 20000
+optimizer_lr: 1e-5
+num_workers: 4
 video_backend: torchcodec
 policy_device: cuda
