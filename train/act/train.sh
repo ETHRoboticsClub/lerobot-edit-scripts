@@ -1,14 +1,15 @@
 export WANDB_MODE=online
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DEVICE_CONFIG="${DEVICE_CONFIG:-$SCRIPT_DIR/configs/5080_workstation.yaml}"
+DEVICE_CONFIG="${DEVICE_CONFIG:-$SCRIPT_DIR/configs/aws_gpul.yaml}"
 
 DATASET_REPO_ID="$(yq -r '.dataset_repo_id' "$DEVICE_CONFIG")"
 POLICY_REPO_ID="$(yq -r '.policy_repo_id' "$DEVICE_CONFIG")"
 OUTPUT_DIR="${OUTPUT_DIR:-$(yq -r '.output_dir' "$DEVICE_CONFIG")}"
 JOB_NAME="$(yq -r '.job_name' "$DEVICE_CONFIG")"
 RESUME="${RESUME:-true}"
-CONFIG_PATH="${CONFIG_PATH:-$OUTPUT_DIR/checkpoints/last/pretrained_model/train_config.json}"
+CHECKPOINT_NAME="${CHECKPOINT_NAME:-last}"
+CONFIG_PATH="${CONFIG_PATH:-$OUTPUT_DIR/checkpoints/$CHECKPOINT_NAME/pretrained_model/train_config.json}"
 
 NUM_MACHINES="$(yq -r '.num_machines' "$DEVICE_CONFIG")"
 MULTI_GPU="$(yq -r '.multi_gpu' "$DEVICE_CONFIG")"

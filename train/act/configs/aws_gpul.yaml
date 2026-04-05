@@ -1,6 +1,6 @@
 dataset_repo_id: ETHRC/towelspring26_2
 policy_repo_id: ETHRC/act-towelspring26_2
-output_dir: /checkpoints/act_2/checkpoints/
+output_dir: /checkpoints/act_2/
 job_name: act_training_2
 num_machines: 1
 multi_gpu: true
