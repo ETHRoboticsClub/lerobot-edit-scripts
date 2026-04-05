@@ -1,7 +1,7 @@
 checkpoint_dir: /checkpoints
 num_machines: 1
 multi_gpu: true
-num_processes: 4
+num_processes: 1
 mixed_precision: bf16
 dynamo_backend: "no"
 batch_size: 48
