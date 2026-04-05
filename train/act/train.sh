@@ -1,6 +1,7 @@
 export WANDB_MODE=online
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 DEVICE_CONFIG="${DEVICE_CONFIG:-$SCRIPT_DIR/configs/aws_gpul.yaml}"
 
 eval "$(
@@ -96,7 +97,7 @@ UV_CACHE_DIR=/tmp/uv-cache uv run accelerate launch \
   --num_processes="$NUM_PROCESSES" \
   --mixed_precision="$MIXED_PRECISION" \
   --dynamo_backend="$DYNAMO_BACKEND" \
-  "$SCRIPT_DIR/../.venv/bin/lerobot-train" \
+  "$REPO_ROOT/.venv/bin/lerobot-train" \
   ${CONFIG_PATH:+--config_path=$CONFIG_PATH} \
   --dataset.repo_id="$DATASET_REPO_ID" \
   --dataset.revision="main" \
