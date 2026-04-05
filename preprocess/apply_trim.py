@@ -1,17 +1,23 @@
 import argparse
 import csv
 import shutil
+import sys
 from pathlib import Path
 
 import numpy as np
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from project_config import get_dataset_repo_id
 from lerobot.datasets.lerobot_dataset import LeRobotDataset
 from lerobot.datasets.utils import DEFAULT_FEATURES
 from lerobot.utils.constants import HF_LEROBOT_HOME
 
 
-DEFAULT_REPO_ID = "ETHRC/towelspring26-cleaned"
-DEFAULT_TRIM_CSV = Path("preprocess/output/trim_timestamps.csv")
+DEFAULT_REPO_ID = get_dataset_repo_id()
+DEFAULT_TRIM_CSV = REPO_ROOT / "output" / "trim_timestamps.csv"
 
 
 def parse_args() -> argparse.Namespace:
@@ -33,7 +39,7 @@ def parse_args() -> argparse.Namespace:
         "--trim-csv",
         type=Path,
         default=DEFAULT_TRIM_CSV,
-        help="CSV produced by scripts/trim_before_j2_lift.py.",
+        help="CSV produced by preprocess/calculate_trim_before_j2_lift.py.",
     )
     parser.add_argument(
         "--trim-column",

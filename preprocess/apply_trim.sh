@@ -1,6 +1,12 @@
-UV_CACHE_DIR=.uv-cache uv run python scripts/apply_trim.py \
-  --repo-id ETHRC/towelspring26_2 \
-  --new-repo-id ETHRC/towelspring26_2 \
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+REPO="$(UV_CACHE_DIR=.uv-cache uv run python project_config.py dataset_repo_id)"
+
+UV_CACHE_DIR=.uv-cache uv run python preprocess/apply_trim.py \
+  --repo-id "$REPO" \
+  --new-repo-id "$REPO" \
   --resume \
   --vcodec auto \
   --streaming-encoding \

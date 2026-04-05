@@ -1,14 +1,23 @@
 import csv
-import numpy as np
+import sys
 from pathlib import Path
+
+import numpy as np
 from lerobot.datasets.lerobot_dataset import LeRobotDataset
 
-repo_id = "ETHRC/towelspring26_2"
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from project_config import get_dataset_repo_id
+
+
+REPO = get_dataset_repo_id()
 seconds_before = 0.3
 threshold = 0.1
-output_path = Path("output/trim_timestamps.csv")
+output_path = REPO_ROOT / "output" / "trim_timestamps.csv"
 
-ds = LeRobotDataset(repo_id)
+ds = LeRobotDataset(REPO)
 fps = ds.fps
 frames_before = round(seconds_before * fps)
 joint_names = ["left_joint_2.pos", "right_joint_2.pos"]
@@ -16,24 +25,16 @@ joint_idxs = [ds.features["observation.state"]["names"].index(name) for name in 
 ds._ensure_hf_dataset_loaded()
 
 
-def load_processed_episodes(path: Path) -> set[int]:
-    processed = set()
+def confirm_overwrite(path: Path) -> None:
     if not path.exists():
-        return processed
+        return
 
-    with path.open(newline="") as f:
-        try:
-            reader = csv.DictReader(f)
-        except csv.Error:
-            return processed
+    reply = input(f"{path} already exists. Delete it and regenerate it? [y/N]: ").strip().lower()
+    if reply not in {"y", "yes"}:
+        raise SystemExit("Aborted; existing trim CSV was left untouched.")
 
-        for row in reader:
-            try:
-                processed.add(int(row["episode_index"]))
-            except (KeyError, TypeError, ValueError):
-                continue
-
-    return processed
+    path.unlink()
+    print(f"deleted {path}", flush=True)
 
 
 def format_ts(frame_idx: int) -> str:
@@ -45,7 +46,6 @@ def format_ts(frame_idx: int) -> str:
         millis = 0
     return f"{whole}.{millis:03d}s"
 
-processed_episodes = load_processed_episodes(output_path)
 fieldnames = [
     "episode_number",
     "episode_index",
@@ -61,16 +61,13 @@ print(f"num_episodes={ds.num_episodes}", flush=True)
 print(f"joints={', '.join(joint_names)}", flush=True)
 
 output_path.parent.mkdir(parents=True, exist_ok=True)
+confirm_overwrite(output_path)
 
-with output_path.open("a", newline="") as f:
+with output_path.open("w", newline="") as f:
     writer = csv.DictWriter(f, fieldnames=fieldnames)
-    if f.tell() == 0:
-        writer.writeheader()
+    writer.writeheader()
 
     for ep in range(ds.num_episodes):
-        if ep in processed_episodes:
-            continue
-
         ep_start = ds.meta.episodes["dataset_from_index"][ep]
         ep_end = ds.meta.episodes["dataset_to_index"][ep]
         states = np.asarray(ds.hf_dataset[ep_start:ep_end]["observation.state"])

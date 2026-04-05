@@ -24,6 +24,8 @@ for key, value in config.items():
 PY
 )"
 
+DATASET_REPO_ID="${DATASET_REPO_ID:-$(UV_CACHE_DIR=/tmp/uv-cache uv run python "$REPO_ROOT/project_config.py" dataset_repo_id)}"
+
 DATASET_REPO_ID="${DATASET_REPO_ID_OVERRIDE:-$DATASET_REPO_ID}"
 POLICY_REPO_ID="${POLICY_REPO_ID_OVERRIDE:-$POLICY_REPO_ID}"
 OUTPUT_DIR="${OUTPUT_DIR:-$OUTPUT_DIR}"
