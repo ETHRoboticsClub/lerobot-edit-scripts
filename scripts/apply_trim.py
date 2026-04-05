@@ -7,6 +7,7 @@ import numpy as np
 
 from lerobot.datasets.lerobot_dataset import LeRobotDataset
 from lerobot.datasets.utils import DEFAULT_FEATURES
+from lerobot.utils.constants import HF_LEROBOT_HOME
 
 
 DEFAULT_REPO_ID = "ETHRC/towelspring26-cleaned"
@@ -147,8 +148,13 @@ def build_frame(item: dict, feature_names: list[str]) -> dict:
     return frame
 
 
+def resolve_dataset_root(root: Path | None, repo_id: str) -> Path:
+    return root if root is not None else HF_LEROBOT_HOME / repo_id
+
+
 def main() -> None:
     args = parse_args()
+    destination_root = resolve_dataset_root(args.new_root, args.new_repo_id)
 
     if args.overwrite and args.resume:
         raise ValueError("Use only one of --overwrite or --resume")
@@ -157,11 +163,11 @@ def main() -> None:
         raise ValueError("--push-only requires --push-to-hub")
 
     if args.push_only:
-        if args.new_root is None or not args.new_root.exists():
+        if not destination_root.exists():
             raise FileNotFoundError(
-                "--push-only requires an existing --new-root destination dataset on disk"
+                f"--push-only requires an existing destination dataset on disk: {destination_root}"
             )
-        dst = LeRobotDataset(repo_id=args.new_repo_id, root=args.new_root)
+        dst = LeRobotDataset(repo_id=args.new_repo_id, root=destination_root)
         print(
             f"pushing existing local dataset {args.new_repo_id}"
             + (f" to branch {args.branch}" if args.branch else ""),
@@ -179,15 +185,15 @@ def main() -> None:
 
     src = LeRobotDataset(repo_id=args.repo_id, root=args.root)
 
-    if args.new_root is not None and args.new_root.exists():
+    if destination_root.exists():
         if not args.overwrite:
             if not args.resume:
                 raise FileExistsError(
-                    f"Destination already exists: {args.new_root}. "
+                    f"Destination already exists: {destination_root}. "
                     "Pass --overwrite to delete it before rewriting or --resume to continue."
                 )
         else:
-            shutil.rmtree(args.new_root)
+            shutil.rmtree(destination_root)
 
     expected_episodes = set(range(src.num_episodes))
     provided_episodes = set(trim_starts)
@@ -198,11 +204,11 @@ def main() -> None:
     if extra:
         raise ValueError(f"Trim CSV has unknown episodes: {extra[:10]}{'...' if len(extra) > 10 else ''}")
 
-    resuming = bool(args.resume and args.new_root is not None and args.new_root.exists())
+    resuming = bool(args.resume and destination_root.exists())
     if resuming:
         dst = LeRobotDataset(
             repo_id=args.new_repo_id,
-            root=args.new_root,
+            root=destination_root,
             video_backend=src.video_backend,
         )
         if dst.num_episodes > src.num_episodes:
@@ -216,7 +222,7 @@ def main() -> None:
     else:
         dst = LeRobotDataset.create(
             repo_id=args.new_repo_id,
-            root=args.new_root,
+            root=destination_root,
             fps=src.fps,
             features=src.features,
             robot_type=src.meta.robot_type,

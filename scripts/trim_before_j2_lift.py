@@ -3,7 +3,7 @@ import numpy as np
 from pathlib import Path
 from lerobot.datasets.lerobot_dataset import LeRobotDataset
 
-repo_id = "ETHRC/towelspring26-cleaned"
+repo_id = "ETHRC/towelspring26_2"
 seconds_before = 0.3
 threshold = 0.1
 output_path = Path("output/trim_timestamps.csv")
