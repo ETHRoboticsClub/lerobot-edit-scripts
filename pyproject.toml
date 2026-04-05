@@ -8,6 +8,7 @@ dependencies = [
     "lerobot>=0.5.0",
     "torch",
     "torchvision",
+    "torchcodec",
 ]
 
 [[tool.uv.index]]
