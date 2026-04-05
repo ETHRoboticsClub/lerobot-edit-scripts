@@ -45,6 +45,11 @@ def safe_concatenate_video_files(
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     input_paths = [Path(path) for path in input_video_paths]
+    logging.info(
+        "Re-encoding concatenation into %s from %d input file(s)",
+        output_path,
+        len(input_paths),
+    )
 
     with av.open(str(input_paths[0])) as first_container:
         first_stream = first_container.streams.video[0]
@@ -72,6 +77,8 @@ def safe_concatenate_video_files(
 
     try:
         for input_path in input_paths:
+            logging.info("Reading video input %s", input_path)
+            frames_processed = 0
             with av.open(str(input_path)) as input_container:
                 input_stream = input_container.streams.video[0]
                 for frame in input_container.decode(input_stream):
@@ -80,6 +87,10 @@ def safe_concatenate_video_files(
                     clean_frame = clean_frame.reformat(width=width, height=height, format="yuv420p")
                     for packet in output_stream.encode(clean_frame):
                         output_container.mux(packet)
+                    frames_processed += 1
+                    if frames_processed % 300 == 0:
+                        logging.info("Processed %d frames from %s", frames_processed, input_path)
+            logging.info("Finished %s with %d frames", input_path, frames_processed)
 
         for packet in output_stream.encode():
             output_container.mux(packet)
@@ -87,6 +98,7 @@ def safe_concatenate_video_files(
         output_container.close()
 
     shutil.move(str(tmp_output_path), str(output_path))
+    logging.info("Finished concatenated video %s", output_path)
 
 
 def build_parser() -> argparse.ArgumentParser:
