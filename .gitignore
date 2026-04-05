@@ -1,12 +1,21 @@
-*
-!.gitignore
-!scripts/
-!scripts/**
-scripts/__pycache__/
-*.py[oc]
-!pyproject.toml
-!README.md
-!uv.lock
+.venv
+.uv-cache
+*__pycache__
+
+# *
+# !.gitignore
+# !scripts/
+# !scripts/**
+# scripts/__pycache__/
+# *.py[oc]
+# !pyproject.toml
+# !README.md
+# !uv.lock
+
+# !preprocess
+# !preprocess/**
+# !train
+# !train/**
 
 
 

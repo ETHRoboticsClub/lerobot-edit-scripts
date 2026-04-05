@@ -11,7 +11,7 @@ from lerobot.utils.constants import HF_LEROBOT_HOME
 
 
 DEFAULT_REPO_ID = "ETHRC/towelspring26-cleaned"
-DEFAULT_TRIM_CSV = Path("output/trim_timestamps.csv")
+DEFAULT_TRIM_CSV = Path("preprocess/output/trim_timestamps.csv")
 
 
 def parse_args() -> argparse.Namespace:
