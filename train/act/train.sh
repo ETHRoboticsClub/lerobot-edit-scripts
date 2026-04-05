@@ -4,7 +4,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEVICE_CONFIG="${DEVICE_CONFIG:-$SCRIPT_DIR/configs/aws_gpul.yaml}"
 
 eval "$(
-  UV_CACHE_DIR=/tmp/uv-cache uv run python - <<'PY' "$DEVICE_CONFIG"
+  UV_CACHE_DIR=/tmp/uv-cache uv run python - "$DEVICE_CONFIG" <<'PY'
 import shlex
 import sys
 
@@ -42,6 +42,32 @@ OPTIMIZER_LR="${OPTIMIZER_LR_OVERRIDE:-$OPTIMIZER_LR}"
 NUM_WORKERS="${NUM_WORKERS_OVERRIDE:-$NUM_WORKERS}"
 VIDEO_BACKEND="${VIDEO_BACKEND_OVERRIDE:-$VIDEO_BACKEND}"
 POLICY_DEVICE="${POLICY_DEVICE_OVERRIDE:-$POLICY_DEVICE}"
+
+required_vars=(
+  DATASET_REPO_ID
+  POLICY_REPO_ID
+  OUTPUT_DIR
+  JOB_NAME
+  NUM_MACHINES
+  MULTI_GPU
+  NUM_PROCESSES
+  MIXED_PRECISION
+  DYNAMO_BACKEND
+  BATCH_SIZE
+  STEPS
+  OPTIMIZER_LR
+  NUM_WORKERS
+  VIDEO_BACKEND
+  POLICY_DEVICE
+)
+
+for var_name in "${required_vars[@]}"; do
+  if [ -z "${!var_name}" ]; then
+    printf 'Missing config value: %s\n' "$var_name"
+    printf 'Config file: %s\n' "$DEVICE_CONFIG"
+    exit 1
+  fi
+done
 
 if [ -d "$OUTPUT_DIR" ] && [ "$RESUME" != "true" ]; then
   printf 'Output directory already exists: %s\n' "$OUTPUT_DIR"
