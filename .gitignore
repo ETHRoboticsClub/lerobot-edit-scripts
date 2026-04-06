@@ -4,6 +4,7 @@
 data
 meta
 videos
+output
 
 # *
 # !.gitignore
@@ -19,7 +20,6 @@ videos
 # !preprocess/**
 # !train
 # !train/**
-
 
 
 

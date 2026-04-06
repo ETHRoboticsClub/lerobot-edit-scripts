@@ -17,7 +17,7 @@ seconds_before = 0.3
 threshold = 0.1
 output_path = REPO_ROOT / "output" / "trim_timestamps.csv"
 
-ds = LeRobotDataset(REPO)
+ds = LeRobotDataset(REPO, force_cache_sync=True)
 fps = ds.fps
 frames_before = round(seconds_before * fps)
 joint_names = ["left_joint_2.pos", "right_joint_2.pos"]
