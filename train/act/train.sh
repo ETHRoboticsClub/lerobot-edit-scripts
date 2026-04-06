@@ -173,6 +173,7 @@ OPTIMIZER_LR="${OPTIMIZER_LR_OVERRIDE:-$OPTIMIZER_LR}"
 NUM_WORKERS="${NUM_WORKERS_OVERRIDE:-$NUM_WORKERS}"
 VIDEO_BACKEND="${VIDEO_BACKEND_OVERRIDE:-$VIDEO_BACKEND}"
 POLICY_DEVICE="${POLICY_DEVICE_OVERRIDE:-$POLICY_DEVICE}"
+CHECKPOINT_STEPS="${CHECKPOINT_STEPS_OVERRIDE:-${CHECKPOINT_STEPS:-900}}"
 
 required_vars=(
   DATASET_REPO_ID
@@ -252,7 +253,7 @@ UV_CACHE_DIR=/tmp/uv-cache uv run accelerate launch \
   --policy.optimizer_lr="$OPTIMIZER_LR" \
   --num_workers="$NUM_WORKERS" \
   --dataset.video_backend="$VIDEO_BACKEND" \
-  --save_freq="900" \
+  --save_freq="$CHECKPOINT_STEPS" \
   --log_freq="20" \
   --policy.push_to_hub="true" \
   --job_name="$JOB_NAME" \

@@ -7,6 +7,7 @@ dynamo_backend: inductor
 batch_size: 96
 steps: 2100
 optimizer_lr: 4.8e-4
+checkpoint_steps: 900
 num_workers: 24
 video_backend: torchcodec
 policy_device: cuda
