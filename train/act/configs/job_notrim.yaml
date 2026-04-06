@@ -1,8 +1,8 @@
 dataset_repo_id: ETHRC/towelspring26_3
 policy_repo_id: ETHRC/act-towelspring26_3_notrim
-job_name: act_training
+job_name: act_training_notrim
 architecture: act
-run_name: realsense_1
+run_name: realsense_1_notrim
 resume: false
 dataset:
   image_transforms:
