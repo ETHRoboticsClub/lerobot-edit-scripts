@@ -12,10 +12,18 @@ CONFIG_DIR="$SCRIPT_DIR/configs"
 JOB_CONFIG="${JOB_CONFIG:-$SCRIPT_DIR/configs/job.yaml}"
 
 detect_device_config() {
-  local gpu_name gpu_name_lower fallback_config
+  local gpu_count gpu_name gpu_name_lower gpu_names l40s_count fallback_config
   fallback_config="$CONFIG_DIR/aws_gpul.yaml"
-  gpu_name="$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -n 1 | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+  gpu_names="$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null || true)"
+  gpu_name="$(printf '%s\n' "$gpu_names" | head -n 1 | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
   gpu_name_lower="$(printf '%s' "$gpu_name" | tr '[:upper:]' '[:lower:]')"
+  gpu_count="$(printf '%s\n' "$gpu_names" | awk 'NF { count++ } END { print count + 0 }')"
+  l40s_count="$(printf '%s\n' "$gpu_names" | awk 'tolower($0) ~ /l40s/ { count++ } END { print count + 0 }')"
+
+  if [ "$gpu_count" -eq 4 ] && [ "$l40s_count" -eq 4 ]; then
+    printf '%s\n' "$CONFIG_DIR/aws_gpul.yaml"
+    return
+  fi
 
   case "$gpu_name_lower" in
     *gb10*)
@@ -31,6 +39,9 @@ detect_device_config() {
 }
 
 DEVICE_CONFIG="${DEVICE_CONFIG:-$(detect_device_config)}"
+
+printf 'Using device config: %s\n' "$DEVICE_CONFIG"
+printf 'Using job config: %s\n' "$JOB_CONFIG"
 
 OUTPUT_DIR_OVERRIDE="${OUTPUT_DIR:-}"
 CONFIG_PATH_OVERRIDE="${CONFIG_PATH:-}"
