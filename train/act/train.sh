@@ -91,6 +91,45 @@ for key, value in policy.items():
 PY
 )
 
+dataset_args=()
+while IFS= read -r dataset_arg; do
+  dataset_args+=("$dataset_arg")
+done < <(
+  UV_CACHE_DIR=/tmp/uv-cache uv run python - "$DEVICE_CONFIG" "$JOB_CONFIG" <<'PY'
+import json
+import sys
+
+import yaml
+
+config = {}
+for path in sys.argv[1:]:
+    with open(path) as f:
+        loaded = yaml.safe_load(f) or {}
+    config.update(loaded)
+
+
+def emit_args(prefix, value):
+    if prefix.endswith(".tfs") and isinstance(value, dict):
+        print(f"--{prefix}={json.dumps(value, separators=(',', ':'))}")
+    elif isinstance(value, dict):
+        for key, nested_value in value.items():
+            emit_args(f"{prefix}.{key}", nested_value)
+    elif isinstance(value, list):
+        print(f"--{prefix}={json.dumps(value, separators=(',', ':'))}")
+    elif isinstance(value, bool):
+        print(f"--{prefix}={'true' if value else 'false'}")
+    elif value is None:
+        print(f"--{prefix}=null")
+    else:
+        print(f"--{prefix}={value}")
+
+
+dataset = config.get("dataset") or {}
+for key, value in dataset.items():
+    emit_args(f"dataset.{key}", value)
+PY
+)
+
 DATASET_REPO_ID="${DATASET_REPO_ID:-$(UV_CACHE_DIR=/tmp/uv-cache uv run python "$REPO_ROOT/project_config.py" dataset_repo_id)}"
 
 DATASET_REPO_ID="${DATASET_REPO_ID_OVERRIDE:-$DATASET_REPO_ID}"
@@ -190,6 +229,7 @@ UV_CACHE_DIR=/tmp/uv-cache uv run accelerate launch \
   ${CONFIG_PATH:+--config_path=$CONFIG_PATH} \
   --dataset.repo_id="$DATASET_REPO_ID" \
   --dataset.revision="main" \
+  "${dataset_args[@]}" \
   --policy.type="act" \
   --policy.repo_id="$POLICY_REPO_ID" \
   "${policy_args[@]}" \
