@@ -7,7 +7,7 @@ resume: true
 dataset:
   image_transforms:
     enable: true
-    max_num_transforms: 3
+    max_num_transforms: 2
     random_order: false
     tfs:
       brightness:
