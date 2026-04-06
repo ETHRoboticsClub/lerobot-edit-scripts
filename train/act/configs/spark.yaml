@@ -3,7 +3,7 @@ num_machines: 1
 multi_gpu: false
 num_processes: 1
 mixed_precision: bf16
-dynamo_backend: "no"
+dynamo_backend: inductor
 batch_size: 50
 steps: 25000
 optimizer_lr: 6e-5
