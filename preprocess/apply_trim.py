@@ -216,6 +216,9 @@ def main() -> None:
             repo_id=args.new_repo_id,
             root=destination_root,
             video_backend=src.video_backend,
+            vcodec=args.vcodec,
+            streaming_encoding=args.streaming_encoding,
+            encoder_threads=args.encoder_threads,
         )
         if dst.num_episodes > src.num_episodes:
             raise ValueError(

@@ -50,6 +50,8 @@ for path in sys.argv[1:]:
     config.update(loaded)
 
 for key, value in config.items():
+    if isinstance(value, (dict, list)):
+        continue
     shell_key = key.upper()
     if isinstance(value, bool):
         shell_value = "true" if value else "false"
@@ -58,6 +60,36 @@ for key, value in config.items():
     print(f'{shell_key}={shlex.quote(shell_value)}')
 PY
 )"
+
+policy_args=()
+while IFS= read -r policy_arg; do
+  policy_args+=("$policy_arg")
+done < <(
+  UV_CACHE_DIR=/tmp/uv-cache uv run python - "$DEVICE_CONFIG" "$JOB_CONFIG" <<'PY'
+import json
+import sys
+
+import yaml
+
+config = {}
+for path in sys.argv[1:]:
+    with open(path) as f:
+        loaded = yaml.safe_load(f) or {}
+    config.update(loaded)
+
+policy = config.get("policy") or {}
+for key, value in policy.items():
+    if isinstance(value, (dict, list)):
+        value = json.dumps(value, separators=(",", ":"))
+    elif isinstance(value, bool):
+        value = "true" if value else "false"
+    elif value is None:
+        value = "null"
+    else:
+        value = str(value)
+    print(f"--policy.{key}={value}")
+PY
+)
 
 DATASET_REPO_ID="${DATASET_REPO_ID:-$(UV_CACHE_DIR=/tmp/uv-cache uv run python "$REPO_ROOT/project_config.py" dataset_repo_id)}"
 
@@ -160,6 +192,7 @@ UV_CACHE_DIR=/tmp/uv-cache uv run accelerate launch \
   --dataset.revision="main" \
   --policy.type="act" \
   --policy.repo_id="$POLICY_REPO_ID" \
+  "${policy_args[@]}" \
   --output_dir="$OUTPUT_DIR" \
   --batch_size="$BATCH_SIZE" \
   --steps="$STEPS" \

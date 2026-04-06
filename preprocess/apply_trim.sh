@@ -9,7 +9,7 @@ UV_CACHE_DIR=.uv-cache uv run python preprocess/apply_trim.py \
   --repo-id "$REPO" \
   --new-repo-id "$NEW_REPO" \
   --resume \
-  --vcodec auto \
+  --vcodec h264_nvenc \
   --streaming-encoding \
   --push-to-hub \
   --branch main
