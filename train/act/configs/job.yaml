@@ -1,5 +1,5 @@
-dataset_repo_id: ETHRC/towelspring26_realsense
-policy_repo_id: ETHRC/act-towelspring26_realsense
+dataset_repo_id: ETHRC/towelspring26_3
+policy_repo_id: ETHRC/act-towelspring26_3
 job_name: act_training
 architecture: act
 run_name: realsense
