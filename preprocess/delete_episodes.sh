@@ -7,6 +7,6 @@ REPO_ID="$(UV_CACHE_DIR=.uv-cache uv run python project_config.py dataset_repo_i
 uv run lerobot-edit-dataset \
     --repo_id "$REPO_ID" \
     --operation.type delete_episodes \
-    --operation.episode_indices "[12]" \
+    --operation.episode_indices "[19, 21, 23, 25, 43, 50, 51, 52, 54, 107]" \
     --push_to_hub true
     # --new_repo_id ETHRC/towelspring26-cleaned \
