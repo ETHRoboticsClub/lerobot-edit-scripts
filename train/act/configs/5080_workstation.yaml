@@ -4,9 +4,9 @@ multi_gpu: false
 num_processes: 1
 mixed_precision: bf16
 dynamo_backend: inductor
-batch_size: 48
-steps: 40000
-optimizer_lr: 1.5e-5
+batch_size: 40
+steps: 20000
+optimizer_lr: 5e-5
 num_workers: 12
 video_backend: torchcodec
 policy_device: cuda
