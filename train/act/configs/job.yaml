@@ -3,7 +3,7 @@ policy_repo_id: ETHRC/act-towelspring26_3
 job_name: act_training
 architecture: act
 run_name: realsense_1
-resume: true
+resume: false
 dataset:
   image_transforms:
     enable: true

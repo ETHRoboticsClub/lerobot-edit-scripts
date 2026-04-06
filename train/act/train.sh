@@ -249,6 +249,7 @@ UV_CACHE_DIR=/tmp/uv-cache uv run accelerate launch \
   --batch_size="$BATCH_SIZE" \
   --steps="$STEPS" \
   --optimizer.lr="$OPTIMIZER_LR" \
+  --policy.optimizer_lr="$OPTIMIZER_LR" \
   --num_workers="$NUM_WORKERS" \
   --dataset.video_backend="$VIDEO_BACKEND" \
   --save_freq="900" \
