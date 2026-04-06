@@ -4,7 +4,7 @@ multi_gpu: false
 num_processes: 1
 mixed_precision: bf16
 dynamo_backend: inductor
-batch_size: 40
+batch_size: 38
 steps: 20000
 optimizer_lr: 5e-5
 num_workers: 12
