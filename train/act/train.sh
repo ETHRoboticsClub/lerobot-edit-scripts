@@ -255,6 +255,7 @@ UV_CACHE_DIR=/tmp/uv-cache uv run accelerate launch \
   --policy.push_to_hub="true" \
   --job_name="$JOB_NAME" \
   --wandb.project="act" \
+  --wandb.entity="eth-robotics-club" \
   --wandb.enable="true" \
   --policy.device="$POLICY_DEVICE" \
   --resume="$RESUME"
