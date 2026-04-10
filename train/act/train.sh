@@ -146,7 +146,6 @@ DATASET_REPO_ID="${DATASET_REPO_ID:-$(UV_CACHE_DIR=/tmp/uv-cache uv run python "
 
 DATASET_REPO_ID="${DATASET_REPO_ID_OVERRIDE:-$DATASET_REPO_ID}"
 POLICY_REPO_ID="${POLICY_REPO_ID_OVERRIDE:-$POLICY_REPO_ID}"
-JOB_NAME="${JOB_NAME_OVERRIDE:-$JOB_NAME}"
 ARCHITECTURE="${ARCHITECTURE_OVERRIDE:-$ARCHITECTURE}"
 RUN_NAME="${RUN_NAME_OVERRIDE:-$RUN_NAME}"
 CHECKPOINT_DIR="${CHECKPOINT_DIR_OVERRIDE:-$CHECKPOINT_DIR}"
@@ -179,7 +178,6 @@ required_vars=(
   DATASET_REPO_ID
   POLICY_REPO_ID
   OUTPUT_DIR
-  JOB_NAME
   ARCHITECTURE
   RUN_NAME
   CHECKPOINT_DIR
@@ -256,7 +254,7 @@ UV_CACHE_DIR=/tmp/uv-cache uv run accelerate launch \
   --save_freq="$CHECKPOINT_STEPS" \
   --log_freq="20" \
   --policy.push_to_hub="true" \
-  --job_name="$JOB_NAME" \
+  --job_name="$RUN_NAME" \
   --wandb.project="act" \
   --wandb.entity="eth-robotics-club" \
   --wandb.enable="true" \

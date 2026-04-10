@@ -1,0 +1,69 @@
+run_name: realsense_1
+resume: false
+dataset_repo_id: ETHRC/towelspring26_3-trimmed
+policy_repo_id: ETHRC/act-towelspring26_3
+architecture: act
+dataset:
+  image_transforms:
+    enable: true
+    max_num_transforms: 2
+    random_order: false
+    tfs:
+      brightness:
+        weight: 1.0
+        type: ColorJitter
+        kwargs:
+          brightness: [0.8, 1.2]
+      contrast:
+        weight: 1.0
+        type: ColorJitter
+        kwargs:
+          contrast: [0.8, 1.2]
+      saturation:
+        weight: 0.2
+        type: ColorJitter
+        kwargs:
+          saturation: [0.5, 1.5]
+      hue:
+        weight: 0.2
+        type: ColorJitter
+        kwargs:
+          hue: [-0.05, 0.05]
+      sharpness:
+        weight: 0
+        type: SharpnessJitter
+        kwargs:
+          sharpness: [0.5, 1.5]
+      affine:
+        weight: 0
+        type: RandomAffine
+        kwargs:
+          degrees: [-5.0, 5.0]
+          translate: [0.05, 0.05]
+policy:
+  n_obs_steps: 1
+  chunk_size: 39
+  n_action_steps: 39
+  normalization_mapping:
+    VISUAL: MEAN_STD
+    STATE: MEAN_STD
+    ACTION: MEAN_STD
+  vision_backbone: resnet18
+  pretrained_backbone_weights: ResNet18_Weights.IMAGENET1K_V1
+  replace_final_stride_with_dilation: false
+  pre_norm: false
+  dim_model: 512
+  n_heads: 8
+  dim_feedforward: 3200
+  feedforward_activation: relu
+  n_encoder_layers: 4
+  n_decoder_layers: 1
+  use_vae: true
+  latent_dim: 32
+  n_vae_encoder_layers: 4
+  temporal_ensemble_coeff: null
+  dropout: 0.1
+  kl_weight: 10.0
+  optimizer_lr: 1e-5
+  optimizer_weight_decay: 1e-4
+  optimizer_lr_backbone: 1e-5
