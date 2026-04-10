@@ -1,9 +1,8 @@
-dataset_repo_id: ETHRC/towelspring26_3-trimmed
-policy_repo_id: ETHRC/act-towelspring26_3
-job_name: act_training
-architecture: act
-run_name: realsense_1
+run_name: repo_2_w_newcode
 resume: false
+dataset_repo_id: ETHRC/towelspring26_2
+policy_repo_id: ETHRC/act-towelspring26_2_newcode
+architecture: act
 dataset:
   image_transforms:
     enable: true
