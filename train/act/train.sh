@@ -33,6 +33,9 @@ detect_device_config() {
     *5080*)
       printf '%s\n' "$CONFIG_DIR/5080_workstation.yaml"
       ;;
+    *a100*)
+      printf '%s\n' "$CONFIG_DIR/aws_a100.yaml"
+      ;;
     *)
       printf '%s\n' "$fallback_config"
       ;;

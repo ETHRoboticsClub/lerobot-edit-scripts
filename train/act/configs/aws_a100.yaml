@@ -1,0 +1,15 @@
+# Single A100 40GB on cluster (Hydra launch profile: a100).
+# Merge with job.yaml via train/act/train.sh (DEVICE_CONFIG + JOB_CONFIG).
+checkpoint_dir: /checkpoints
+num_machines: 1
+multi_gpu: false
+num_processes: 1
+mixed_precision: bf16
+dynamo_backend: inductor
+batch_size: 48
+steps: 2100
+optimizer_lr: 6e-5
+checkpoint_steps: 900
+num_workers: 8
+video_backend: torchcodec
+policy_device: cuda
