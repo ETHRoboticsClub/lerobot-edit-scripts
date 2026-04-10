@@ -14,7 +14,7 @@ JOB_CONFIG="${JOB_CONFIG:-$SCRIPT_DIR/configs/job.yaml}"
 
 detect_device_config() {
   local gpu_count gpu_name gpu_name_lower gpu_names l40s_count fallback_config
-  fallback_config="$CONFIG_DIR/aws_gpul.yaml"
+  fallback_config="$CONFIG_DIR/aws_gpus.yaml"
   gpu_names="$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null || true)"
   gpu_name="$(printf '%s\n' "$gpu_names" | head -n 1 | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
   gpu_name_lower="$(printf '%s' "$gpu_name" | tr '[:upper:]' '[:lower:]')"
