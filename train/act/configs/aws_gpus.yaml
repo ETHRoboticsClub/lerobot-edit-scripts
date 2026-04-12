@@ -10,6 +10,6 @@ batch_size: 48
 steps: 2100
 optimizer_lr: 6e-5
 checkpoint_steps: 900
-num_workers: 8
+num_workers: 4
 video_backend: torchcodec
 policy_device: cuda
