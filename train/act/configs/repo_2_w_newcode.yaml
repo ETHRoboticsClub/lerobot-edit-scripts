@@ -1,7 +1,7 @@
-run_name: repo_2_w_newcode
+run_name: dataset2_w_newcode_run2
 resume: false
 dataset_repo_id: ETHRC/towelspring26_2
-policy_repo_id: ETHRC/act-towelspring26_2_newcode
+policy_repo_id: ETHRC/act-towelspring26_2_newcode_run2
 architecture: act
 dataset:
   image_transforms:
