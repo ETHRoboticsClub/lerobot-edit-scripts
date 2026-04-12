@@ -155,14 +155,39 @@ CHECKPOINT_DIR="${CHECKPOINT_DIR_OVERRIDE:-$CHECKPOINT_DIR}"
 OUTPUT_DIR_DEFAULT="$CHECKPOINT_DIR/$ARCHITECTURE/$RUN_NAME"
 OUTPUT_DIR="${OUTPUT_DIR_OVERRIDE:-$OUTPUT_DIR_DEFAULT}"
 RESUME="${RESUME_OVERRIDE:-${RESUME:-true}}"
+RESUME_MODE="$(printf '%s' "$RESUME" | tr '[:upper:]' '[:lower:]')"
+case "$RESUME_MODE" in
+  true|false|overwrite)
+    ;;
+  *)
+    printf 'Invalid resume value: %s\n' "$RESUME"
+    printf 'Use one of: true, false, overwrite.\n'
+    exit 1
+    ;;
+esac
 CHECKPOINT_NAME="${CHECKPOINT_NAME:-last}"
 if [ -n "$CONFIG_PATH_OVERRIDE" ]; then
   CONFIG_PATH="$CONFIG_PATH_OVERRIDE"
-elif [ "$RESUME" = "true" ]; then
+elif [ "$RESUME_MODE" = "true" ]; then
   CONFIG_PATH="$OUTPUT_DIR/checkpoints/$CHECKPOINT_NAME/pretrained_model/train_config.json"
 else
   CONFIG_PATH=""
 fi
+TRAIN_RESUME="false"
+if [ "$RESUME_MODE" = "true" ]; then
+  TRAIN_RESUME="true"
+fi
+
+remove_output_dir() {
+  local path="$1"
+  case "$path" in
+    ""|"/")
+      printf 'Refusing to remove unsafe output directory: %s\n' "$path"
+      exit 1
+      ;;
+  esac
+  rm -rf -- "$path"
+}
 
 NUM_MACHINES="${NUM_MACHINES_OVERRIDE:-$NUM_MACHINES}"
 MULTI_GPU="${MULTI_GPU_OVERRIDE:-$MULTI_GPU}"
@@ -206,24 +231,34 @@ for var_name in "${required_vars[@]}"; do
   fi
 done
 
-if [ "$RESUME" = "true" ] && [ ! -f "$CONFIG_PATH" ]; then
+if [ "$RESUME_MODE" = "true" ] && [ ! -f "$CONFIG_PATH" ]; then
   printf 'Resume config file not found: %s\n' "$CONFIG_PATH"
   printf 'Set CONFIG_PATH explicitly or choose an OUTPUT_DIR/CHECKPOINT_NAME with a valid checkpoint.\n'
   exit 1
 fi
 
-if [ -d "$OUTPUT_DIR" ] && [ "$RESUME" != "true" ]; then
-  printf 'Output directory already exists: %s\n' "$OUTPUT_DIR"
-  printf 'Resume is disabled. Remove it and continue? [y/N] '
-  read -r confirm
-
-  case "$confirm" in
-    y|Y)
-      rm -rf "$OUTPUT_DIR"
+if [ -d "$OUTPUT_DIR" ]; then
+  case "$RESUME_MODE" in
+    true)
       ;;
-    *)
-      printf 'Aborting.\n'
-      exit 1
+    overwrite)
+      printf 'Output directory already exists, deleting because resume=overwrite: %s\n' "$OUTPUT_DIR"
+      remove_output_dir "$OUTPUT_DIR"
+      ;;
+    false)
+      printf 'Output directory already exists: %s\n' "$OUTPUT_DIR"
+      printf 'Resume is disabled. Remove it and continue? [y/N] '
+      read -r confirm
+
+      case "$confirm" in
+        y|Y)
+          remove_output_dir "$OUTPUT_DIR"
+          ;;
+        *)
+          printf 'Aborting.\n'
+          exit 1
+          ;;
+      esac
       ;;
   esac
 fi
@@ -262,4 +297,4 @@ UV_CACHE_DIR=/tmp/uv-cache uv run accelerate launch \
   --wandb.entity="eth-robotics-club" \
   --wandb.enable="true" \
   --policy.device="$POLICY_DEVICE" \
-  --resume="$RESUME"
+  --resume="$TRAIN_RESUME"
