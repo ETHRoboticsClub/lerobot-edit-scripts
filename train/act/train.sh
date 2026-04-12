@@ -52,7 +52,7 @@ CONFIG_PATH_OVERRIDE="${CONFIG_PATH:-}"
 RESUME_OVERRIDE="${RESUME:-}"
 
 eval "$(
-  UV_CACHE_DIR=/tmp/uv-cache uv run python - "$DEVICE_CONFIG" "$JOB_CONFIG" <<'PY'
+  uv run python - "$DEVICE_CONFIG" "$JOB_CONFIG" <<'PY'
 import shlex
 import sys
 
@@ -80,7 +80,7 @@ policy_args=()
 while IFS= read -r policy_arg; do
   policy_args+=("$policy_arg")
 done < <(
-  UV_CACHE_DIR=/tmp/uv-cache uv run python - "$DEVICE_CONFIG" "$JOB_CONFIG" <<'PY'
+  uv run python - "$DEVICE_CONFIG" "$JOB_CONFIG" <<'PY'
 import json
 import sys
 
@@ -110,7 +110,7 @@ dataset_args=()
 while IFS= read -r dataset_arg; do
   dataset_args+=("$dataset_arg")
 done < <(
-  UV_CACHE_DIR=/tmp/uv-cache uv run python - "$DEVICE_CONFIG" "$JOB_CONFIG" <<'PY'
+  uv run python - "$DEVICE_CONFIG" "$JOB_CONFIG" <<'PY'
 import json
 import sys
 
@@ -145,7 +145,7 @@ for key, value in dataset.items():
 PY
 )
 
-DATASET_REPO_ID="${DATASET_REPO_ID:-$(UV_CACHE_DIR=/tmp/uv-cache uv run python "$REPO_ROOT/project_config.py" dataset_repo_id)}"
+DATASET_REPO_ID="${DATASET_REPO_ID:-$(uv run python "$REPO_ROOT/project_config.py" dataset_repo_id)}"
 
 DATASET_REPO_ID="${DATASET_REPO_ID_OVERRIDE:-$DATASET_REPO_ID}"
 POLICY_REPO_ID="${POLICY_REPO_ID_OVERRIDE:-$POLICY_REPO_ID}"
@@ -268,7 +268,7 @@ if [ "$MULTI_GPU" = "true" ]; then
   accelerate_args+=(--multi_gpu)
 fi
 
-UV_CACHE_DIR=/tmp/uv-cache uv run accelerate launch \
+uv run accelerate launch \
   --num_machines="$NUM_MACHINES" \
   "${accelerate_args[@]}" \
   --num_processes="$NUM_PROCESSES" \
